@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { addExpense } from '@/app/actions';
 
-export default function ExpenseForm() {
+export default function ExpenseForm({ onAddExpense }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -14,11 +13,11 @@ export default function ExpenseForm() {
     setSuccess(false);
 
     const formData = new FormData(e.target);
-    
+
     startTransition(async () => {
-      const result = await addExpense(formData);
-      
-      if (result.error) {
+      const result = await onAddExpense?.(formData);
+
+      if (result?.error) {
         setError(result.error);
       } else {
         setSuccess(true);

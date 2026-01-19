@@ -1,10 +1,86 @@
-import { getExpenses, getTotalExpenses } from '@/lib/expenses';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
 import ExpenseForm from '@/components/ExpenseForm';
 import ExpenseList from '@/components/ExpenseList';
 
-export default async function Home() {
-  const expenses = await getExpenses();
-  const total = await getTotalExpenses();
+const STORAGE_KEY = 'expenses';
+
+export default function Home() {
+  const [expenses, setExpenses] = useState([]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setExpenses(
+          parsed.map((e) => ({
+            ...e,
+            amount: Number(e.amount) || 0,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error('Failed to load expenses from localStorage:', error);
+    }
+  }, []);
+
+  function saveToStorage(nextExpenses) {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextExpenses));
+    } catch (error) {
+      console.error('Failed to save expenses to localStorage:', error);
+    }
+  }
+
+  async function handleAddExpense(formData) {
+    const category = formData.get('category')?.toString().trim();
+    const description = formData.get('description')?.toString().trim();
+    const amountRaw = formData.get('amount');
+    const amount = parseFloat(amountRaw);
+
+    if (!category || !description || !amountRaw) {
+      return { error: 'All fields are required' };
+    }
+
+    if (Number.isNaN(amount)) {
+      return { error: 'Amount must be a valid number' };
+    }
+
+    if (amount <= 0) {
+      return { error: 'Amount must be greater than 0' };
+    }
+
+    const newExpense = {
+      id: Date.now().toString(),
+      category,
+      amount,
+      description,
+      createdAt: new Date().toISOString(),
+    };
+
+    const next = [...expenses, newExpense];
+    setExpenses(next);
+    saveToStorage(next);
+
+    return { success: true };
+  }
+
+  async function handleDeleteExpense(id) {
+    const next = expenses.filter((expense) => expense.id !== id);
+    setExpenses(next);
+    saveToStorage(next);
+    return { success: true };
+  }
+
+  const total = useMemo(
+    () => expenses.reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0),
+    [expenses]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
@@ -51,7 +127,7 @@ export default async function Home() {
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Add New Expense
             </h2>
-            <ExpenseForm />
+            <ExpenseForm onAddExpense={handleAddExpense} />
           </div>
 
           {/* Expenses List */}
@@ -59,7 +135,7 @@ export default async function Home() {
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Recent Expenses
             </h2>
-            <ExpenseList expenses={expenses} />
+            <ExpenseList expenses={expenses} onDeleteExpense={handleDeleteExpense} />
           </div>
         </div>
       </div>

@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { deleteExpense } from '@/app/actions';
 
-export default function ExpenseList({ expenses }) {
+export default function ExpenseList({ expenses, onDeleteExpense }) {
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState(null);
 
   async function handleDelete(id) {
+    if (!onDeleteExpense) return;
     setDeletingId(id);
     startTransition(async () => {
-      await deleteExpense(id);
+      await onDeleteExpense(id);
       setDeletingId(null);
     });
   }
