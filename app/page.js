@@ -2,9 +2,9 @@ import { getExpenses, getTotalExpenses } from '@/lib/expenses';
 import ExpenseForm from '@/components/ExpenseForm';
 import ExpenseList from '@/components/ExpenseList';
 
-export default function Home() {
-  const expenses = getExpenses();
-  const total = getTotalExpenses();
+export default async function Home() {
+  const expenses = await getExpenses();
+  const total = await getTotalExpenses();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">

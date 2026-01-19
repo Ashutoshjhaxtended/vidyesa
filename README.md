@@ -16,7 +16,7 @@ A simple and elegant Expense Tracker application built with Next.js 14+ (App Rou
 
 - **Framework**: Next.js 14+ (App Router)
 - **Styling**: Tailwind CSS
-- **Data Storage**: Local JSON file (can be easily replaced with a database)
+- **Data Storage**: Vercel KV in production, local JSON fallback in development
 - **Server Actions**: Used for data mutations (Add/Delete)
 
 ## Getting Started
@@ -59,9 +59,9 @@ vidysea/
 │   ├── ExpenseForm.js      # Add expense form component
 │   └── ExpenseList.js      # Expense list component
 ├── lib/
-│   └── expenses.js         # Data storage utilities
+│   └── expenses.js         # Data storage utilities (KV + dev file fallback)
 └── data/
-    └── expenses.json       # Expense data (auto-created)
+    └── expenses.json       # Dev-only fallback data (auto-created locally)
 ```
 
 ## Deployment
@@ -71,10 +71,13 @@ vidysea/
 1. Push your code to GitHub
 2. Go to [Vercel](https://vercel.com)
 3. Import your GitHub repository
-4. Vercel will automatically detect Next.js and configure the build
-5. Click "Deploy"
+4. In Project Settings → Environment Variables, set:
+   - `KV_REST_API_URL`
+   - `KV_REST_API_TOKEN`
+   (from Vercel KV integration)
+5. Deploy
 
-The application will be live at `https://your-project.vercel.app`
+The app uses Vercel KV for persistent storage in production. In local dev, it falls back to `data/expenses.json`.
 
 ### Deploy to Netlify
 
