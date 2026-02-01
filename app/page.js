@@ -87,7 +87,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Expense Tracker
+            Expense Tracker with Ci CD
           </h1>
           <p className="text-gray-600">Manage your expenses efficiently</p>
         </header>
